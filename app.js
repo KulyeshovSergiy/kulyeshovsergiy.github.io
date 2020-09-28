@@ -245,25 +245,27 @@ $scope.refreshData = function(){
 $http({
   method: "GET",
   //url: "http://api.fixer.io/latest?base=USD"
-  //url: "http://openexchangerates.org/api/latest.json?app_id=42f2e9022e464f518c760625a868d0a6"
-  url: "http://apilayer.net/api/live?access_key=d80f05a8b47b13b6969cf81b9bb77077"
+  url: "https://openexchangerates.org/api/latest.json?app_id=42f2e9022e464f518c760625a868d0a6"
+  //url: "http://apilayer.net/api/live?access_key=d80f05a8b47b13b6969cf81b9bb77077"
   //url: "http://query.yahooapis.com/v1/public/yql?q=select%20*%20from%20yahoo.finance.xchange%20where%20pair%20in%20(%22USDUSD%22,%22USDEUR%22,%22USDHUF%22,%22USDUAH%22,%22USDRUB%22,%22USDKZT%22,%22USDJPY%22,%22USDGBP%22)&env=store://datatables.org/alltableswithkeys&format=json"
      }).then(function successCallback(response) {
     // this callback will be called asynchronously
     // when the response is available
     $scope.statuscode = response.status;
-
+console.log("refreshData",response.data.rates);
     //$scope.content = response.data.query.results;
 //  $scope.reqrates = response.data.rates;
-    $scope.reqrates = response.data.quotes;
+    $scope.reqrates = response.data.rates;
 $scope.allList=[];
 $scope.ddwcurr=[];
-for(let item in response.data.quotes){
-$scope.allList.push({symbol:item.substr(3,3),price:response.data.quotes[item]});
-$scope.ddwcurr.push(item.substr(3,3));
+for(let item in response.data.rates){
+//  console.log(item,response.data.rates[item]);
+$scope.allList.push({symbol:item+"",price:response.data.rates[item]});
+$scope.ddwcurr.push(item+"");
 }
 $scope.ddwcurr.sort();
 $window.allcurr = $scope.ddwcurr;
+$scope.saveDef();
     //$scope.debugoutinfo = response.data.quotes;
     //for(var i=0;i<$scope.reqrates.length;i++){
     //  $scope.addCurrList($scope.reqrates[i].Name,$scope.reqrates[i].Rate,$scope.reqrates[i].Name.slice(-3));
@@ -300,13 +302,12 @@ $window.allcurr = $scope.ddwcurr;
 $scope.init = function(){
 //console.log("init",$window);
 $scope.loadDef();
-//console.log("init",$window,$scope.ddwcurr,$scope.allList);
+//console.log("init",$scope.ddwcurr,$scope.allList);
 
 let dnow = (new Date())-1;
 if(Math.round((dnow-$scope.timestamp)/1000/60/60)>6 || $scope.ddwcurr[0]==$scope.ddwcurr[1]){
-    $scope.refreshData();
-    $scope.timestamp=dnow;
-    $scope.saveDef();
+  $scope.timestamp=dnow;
+  $scope.refreshData();
 }
 $scope.loadCurVal();
 };
