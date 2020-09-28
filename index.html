@@ -1,0 +1,210 @@
+<!doctype html>
+<html ng-app="myApp">
+<head>
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+<script src="app.js"></script>
+<style>
+input.currs { text-align:right;width:10em}
+
+.slidecontainer {
+  width: 100%;
+}
+
+.slider {
+  -webkit-appearance: none;
+  width: 100%;
+  height: 25px;
+  background: #d3d3d3;
+  outline: none;
+  opacity: 0.7;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+}
+.slider-color {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 15px;
+    border-radius: 5px;
+    background: #d3d3d3;
+    outline: none;
+    opacity: 0.7;
+    -webkit-transition: opacity .15s ease-in-out;
+    transition: opacity .15s ease-in-out;
+}
+
+.slider:hover {
+  opacity: 1;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+
+.slider::-moz-range-thumb {
+  width: 25px;
+  height: 25px;
+  background: #4CAF50;
+  cursor: pointer;
+}
+.frac {
+    display: inline-block;
+    position: relative;
+    vertical-align: middle;
+    letter-spacing: 0.001em;
+    text-align: center;
+}
+.frac span {
+    display: block;
+    padding: 0.1em;
+}
+.frac span.bottom {
+    border-top: thin solid black;
+}
+.frac span.symbol {
+    display: none;
+}
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font: 16px Arial;
+}
+
+/*the container must be positioned relative:*/
+.autocomplete {
+  position: relative;
+  display: inline-block;
+}
+
+input {
+  border: 1px solid transparent;
+  background-color: #f1f1f1;
+  padding: 10px;
+  font-size: 16px;
+}
+
+input[type=text] {
+  background-color: #f1f1f1;
+  width: 100%;
+}
+
+input[type=submit] {
+  background-color: DodgerBlue;
+  color: #fff;
+  cursor: pointer;
+}
+
+.autocomplete-items {
+  position: absolute;
+  border: 1px solid #d4d4d4;
+  border-bottom: none;
+  border-top: none;
+  z-index: 99;
+  /*position the autocomplete items to be the same width as the container:*/
+  top: 100%;
+  left: 0;
+  right: 0;
+}
+
+.autocomplete-items div {
+  padding: 10px;
+  cursor: pointer;
+  background-color: #fff;
+  border-bottom: 1px solid #d4d4d4;
+}
+
+/*when hovering an item:*/
+.autocomplete-items div:hover {
+  background-color: #e9e9e9;
+}
+
+.autocomplete-inactive {
+  background-color: #fff;
+  color: #ffffff;
+}
+/*when navigating through the items using the arrow keys:*/
+.autocomplete-active {
+  background-color: DodgerBlue !important;
+  color: #ffffff;
+}
+</style>
+</head>
+<body ng-controller="CurrListController" id="theBoby"
+bgcolor="#AAAAAA"
+leftmargin="0"
+topmargin="0"
+marginwidth="0"
+marginheight="0"
+>
+<form name="mfrm">
+<table border="2" cellspacing="0" cellpadding="5" ng-if="lock_val == 0">
+<tr ng-repeat="ci in currindex">
+<td>
+<div ng-if="currList[ci]">
+<input class="currs" type="number" id="{{currList[ci]}}" name="{{currList[ci]}}" ng-model="currVals[currList[ci]]"
+ng-value="getCurrValue(currList[ci])"
+ng-change="setAllValues(currList[ci],currVals[currList[ci]])">
+{{currList[ci]}}
+</div>
+</td>
+
+<!--<td>{{curr.value}}</td>-->
+</tr>
+</table>
+<table border="2" cellspacing="0" cellpadding="5" ng-if="lock_val == 1">
+<tr ng-repeat="ci in currindex">
+<td>
+<!--
+<select id="currList[ci]" style="width:100%;" ng-model="currList[ci]" ng-change="selCurr()">
+  <option ng-repeat="v in ddwcurr" value="{{v}}">{{v}}</option>
+</select>
+
+ ng-if="ccalk[ci].autocurr.length>0"
+{{curr}}
+-->
+<div class="autocomplete" style="width:100%;">
+<input id="{{currList[ci]}}" type="text" name="{{currList[ci]}}" placeholder="Currency" ng-model="currList[ci]" ng-keydown="procAutoKey($event,ci)" ng-change="procCurr(ci,currList[ci])">
+<div id="currautocomplete-list" class="autocomplete-items">
+<div ng-repeat="v in ccalk[ci].autocurr" ng-click="setCurr(v,ci)" class="ali{{ci}}_{{$index}}">{{v}}
+<input type="hidden" value="{{v}}">
+</div>
+</div>
+</div>
+
+
+</td>
+</tr>
+<tr>
+<td>
+<button type="button" class="btn btn-light" ng-click="delRow()">
+<span class="material-icons">
+remove_circle_outline
+</span>
+</button>
+<button type="button" class="btn btn-light" ng-click="addRow()">
+<span class="material-icons">
+add_circle_outline
+</span>
+</button>
+</td>
+</tr>
+</table>
+<button type="button" class="btn btn-light" ng-click="procLock()">
+<span class="material-icons">
+{{lock_ico}}
+</span>
+</button>
+</form>
+
+<p>{{debugoutinfo}}</p>
+
+</body>
+</html>
