@@ -252,7 +252,7 @@ $http({
     // this callback will be called asynchronously
     // when the response is available
     $scope.statuscode = response.status;
-console.log("refreshData",response.data.rates);
+//console.log("refreshData",response.data.rates);
     //$scope.content = response.data.query.results;
 //  $scope.reqrates = response.data.rates;
     $scope.reqrates = response.data.rates;
