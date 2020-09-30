@@ -11,8 +11,8 @@ myApp.controller("CurrListController", function currListController($scope,$http,
   $scope.thecurr = "";
   $scope.reqrates = null;
   $scope.debugoutinfo = "";
-  $scope.currList = ["USD","EUR"];
-  $scope.currindex = [0,1];
+  $scope.currList = ["USD"];
+  $scope.currindex = [0];
   $scope.ddwcurr = [];
   $scope.allList = [];
   $scope.currVals = {};
