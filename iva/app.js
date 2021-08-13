@@ -10,6 +10,8 @@ myApp.controller("ModelController", function listController($scope) {
   $scope.appdata.mode=1;
   $scope.appdata.csvfile=null;
   $scope.appdata.rawdata=[];
+  $scope.appdata.delta=0.0;
+  $scope.appdata.delta1=0.0;
   $scope.appdata.seasonmid={};
   $scope.appdata.seasonkolvo={};
   $scope.appdata.graph={'width': 1900, 'height': 700};
@@ -19,7 +21,7 @@ myApp.controller("ModelController", function listController($scope) {
   $scope.appdata.ggraph="M 0,0 z";
 
 $scope.drawdata=function(){
-console.log("app drawdata");
+//console.log("app drawdata");
 let arrlen=10,arrth=3;
 let bx=10;
 let by=5;
@@ -124,6 +126,21 @@ s+="M "+x.toString(10)+","+y.toString(10)+" ";
 s+="z";
 $scope.appdata.rgraph=s;
 
+s="";
+for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
+x=bx+i*(GetMaxX-bx)/$scope.appdata.rawdata.length;
+y=GetMaxY-by-$scope.appdata.rawdata[i].forecast1*(GetMaxY-by)/may;
+if(i==0){
+s+="M "+x.toString(10)+","+y.toString(10)+" ";
+}else{
+s+="L "+x.toString(10)+","+y.toString(10)+" ";
+}
+}
+x=bx;
+y=GetMaxY-by-$scope.appdata.rawdata[0].forecast*(GetMaxY-by)/may;
+s+="M "+x.toString(10)+","+y.toString(10)+" ";
+s+="z";
+$scope.appdata.ggraph=s;
 };
 
 $scope.procdata=function(){
@@ -149,12 +166,14 @@ $scope.appdata.seasonkolvo[weeknum]=1;
 }
 
 }//i
+let kp=0;
 s=0;
 for (let w in $scope.appdata.seasonmid) {
   $scope.appdata.seasonmid[w]=$scope.appdata.seasonmid[w]/$scope.appdata.seasonkolvo[w];
   s+=$scope.appdata.seasonmid[w];
+  kp+=1;
 }
-s=s/52;
+s=s/kp;
 for (let w in $scope.appdata.seasonmid) {
   $scope.appdata.seasonmid[w]=$scope.appdata.seasonmid[w]/s;
 }
@@ -163,11 +182,11 @@ for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
 let weeknum=$scope.appdata.rawdata[i].period.slice(4);
 $scope.appdata.rawdata[i].noseasonraw=$scope.appdata.rawdata[i].rawvalue/$scope.appdata.seasonmid[weeknum];
 }
+let n=$scope.appdata.rawdata.length;
 let a11=0.0;
 let a12=0.0;
 let y1=0.0;
 let y2=0.0;
-let n=$scope.appdata.rawdata.length;
 for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
 a11+=(1+i)*(1+i);
 a12+=(1+i);
@@ -183,10 +202,66 @@ let weeknum=$scope.appdata.rawdata[i].period.slice(4);
 $scope.appdata.rawdata[i].forecast=$scope.appdata.rawdata[i].trend*$scope.appdata.seasonmid[weeknum];
 }
 
+y1=0.0;
+y2=0.0;
+for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
+y1+=(1+i)*$scope.appdata.rawdata[i].rawvalue;
+y2+=$scope.appdata.rawdata[i].rawvalue;
+}
 
+a=(n*y1-a12*y2)/d;
+b=(a11*y2-a12*y1)/d;
+for (let w in $scope.appdata.seasonmid) {
+  $scope.appdata.seasonmid[w]=0;
+  $scope.appdata.seasonkolvo[w]=0;
+}
 
+for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
+let weeknum=$scope.appdata.rawdata[i].period.slice(4);
+let zt=a*(i+1)+b;
+$scope.appdata.seasonmid[weeknum]+=$scope.appdata.rawdata[i].rawvalue/zt;
+$scope.appdata.seasonkolvo[weeknum]+=1;
+}
 
+kp=0;
+s=0;
+for (let w in $scope.appdata.seasonmid) {
+  $scope.appdata.seasonmid[w]=$scope.appdata.seasonmid[w]/$scope.appdata.seasonkolvo[w];
+  s+=$scope.appdata.seasonmid[w];
+  kp+=1;
+}
+s=s/kp;
+for (let w in $scope.appdata.seasonmid) {
+  $scope.appdata.seasonmid[w]=$scope.appdata.seasonmid[w]/s;
+}
+for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
+let weeknum=$scope.appdata.rawdata[i].period.slice(4);
+$scope.appdata.rawdata[i].noseasonraw=$scope.appdata.rawdata[i].rawvalue/$scope.appdata.seasonmid[weeknum];
+}
+y1=0.0;
+y2=0.0;
+for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
+y1+=(1+i)*$scope.appdata.rawdata[i].noseasonraw;
+y2+=$scope.appdata.rawdata[i].noseasonraw;
+}
+a=(n*y1-a12*y2)/d;
+b=(a11*y2-a12*y1)/d;
+for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
+let zt=a*(i+1)+b;
+let weeknum=$scope.appdata.rawdata[i].period.slice(4);
+$scope.appdata.rawdata[i].forecast1=zt*$scope.appdata.seasonmid[weeknum];
+}
+let delta=0.0;
+let delta1=0.0;
+for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
+delta+=($scope.appdata.rawdata[i].rawvalue-$scope.appdata.rawdata[i].forecast)*($scope.appdata.rawdata[i].rawvalue-$scope.appdata.rawdata[i].forecast);
+delta1+=($scope.appdata.rawdata[i].rawvalue-$scope.appdata.rawdata[i].forecast1)*($scope.appdata.rawdata[i].rawvalue-$scope.appdata.rawdata[i].forecast1);
+}
+delta=delta/2/$scope.appdata.rawdata.length;
+delta1=delta1/2/$scope.appdata.rawdata.length;
 
+$scope.appdata.delta=delta;
+$scope.appdata.delta1=delta1;
 $scope.drawdata();
 }//$scope.appdata.rawdata.length>52
 };
@@ -212,7 +287,8 @@ seasonk:null,
 seasonrise:null,
 noseasonraw:null,
 trend:null,
-forecast:null});
+forecast:null,
+forecast1:null});
   }
 }
 $scope.procdata();
@@ -224,7 +300,7 @@ $scope.appdata.mode=2;
 
 
 $scope.init=function(){
-console.log("app started");
+//console.log("app started");
 $("datafile").value="";
 };
 

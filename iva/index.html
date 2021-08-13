@@ -43,31 +43,42 @@ Graph: <i class="fas fa-chart-area"></i>
 <path id="rgraph" d="{{appdata.rgraph}}" stroke="red" stroke-width="1" fill="none" />
 <path id="ggraph" d="{{appdata.ggraph}}" stroke="green" stroke-width="1" fill="none" />
 </svg>
+<div ng-if="appdata.mode==3">
+<span style="color : blue;">Продажи</span>
+<span style="color : red;">Прогноз</span>
+<span style="color : green;">Прогноз 2</span>
+</div>
 
 <table border="2" cellspacing="0" cellpadding="5" ng-if="appdata.mode==2">
 <tr>
 <td>#</td>
 <td>Период</td>
 <td>Продажи</td>
-<td>Скользящее среднее</td>
+<!--<td>Скользящее среднее</td>
 <td>Сезонный коэффициент</td>
 <td>Сезонный прирост</td>
 <td>Продажи, очищенные от сезонности</td>
-<td>Тренд</td>
+<td>Тренд</td>-->
 <td>Прогноз</td>
+<td>Прогноз 2</td>
 </tr>
 <tr ng-repeat="si in appdata.rawdata">
 <td style="text-align:right;">{{1+$index}}</td>
 <td style="text-align:right;">{{si.period}}</td>
 <td style="text-align:right;">{{si.rawvalue}}</td>
-<td style="text-align:right;">{{si.slmid}}</td>
+<!--<td style="text-align:right;">{{si.slmid}}</td>
 <td style="text-align:right;">{{si.seasonk}}</td>
 <td style="text-align:right;">{{si.seasonrise}}</td>
 <td style="text-align:right;">{{si.noseasonraw}}</td>
-<td style="text-align:right;">{{si.trend}}</td>
+<td style="text-align:right;">{{si.trend}}</td>-->
 <td style="text-align:right;">{{si.forecast}}</td>
+<td style="text-align:right;">{{si.forecast1}}</td>
 </tr>
-
+<tr>
+<td colspan="3"></td>
+<td>{{appdata.delta}}</td>
+<td>{{appdata.delta1}}</td>
+</tr>
 </table>
 
 
