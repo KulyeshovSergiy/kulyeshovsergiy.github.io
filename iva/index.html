@@ -1,0 +1,80 @@
+<!doctype html>
+<html ng-app="myApp">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+<!--<link href="https://fonts.googleapis.com/icon?family=Material+Icons"  rel="stylesheet">-->
+<script src="https://kit.fontawesome.com/1e245ed36c.js" crossorigin="anonymous"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+<script src="app.js"></script>
+<style>
+td.common { background-color : #AAAAAA}
+td.green { background-color: #00FF00}
+td.red{ background-color : #FF0000}
+</style>
+</head>
+<body ng-controller="ModelController" id="theBoby"
+bgcolor="#AAAAAA"
+leftmargin="0"
+topmargin="0"
+marginwidth="0"
+marginheight="0"
+>
+<form name="mfrm" ng-if="appdata.mode==1">
+<label for="datafile">Select .csv file:</label>
+<input type="file" accept=".csv" id="datafile" file-reader="appdata.csvfile"/>
+<br>
+<button type="button" class="btn btn-light" ng-click="btnclick()" ng_if="appdata.csvfile">
+Process file: <i class="fas fa-file-csv fa-2x"></i>
+</button>
+</form>
+
+<button type="button" class="btn btn-light" ng-click="appdata.mode=2" ng-if="appdata.mode==3">
+Table: <i class="fas fa-table"></i>
+</button>
+<button type="button" class="btn btn-light" ng-click="appdata.mode=3" ng-if="appdata.mode==2">
+Graph: <i class="fas fa-chart-area"></i>
+</button>
+<br>
+<svg ng-attr-height="{{appdata.graph.height}}" ng-attr-width="{{appdata.graph.width}}" ng-if="appdata.mode==3">
+<path id="axes" d="{{appdata.axes}}" stroke="black" stroke-width="1" fill="none" />
+<path id="bgraph" d="{{appdata.bgraph}}" stroke="blue" stroke-width="1" fill="none" />
+<path id="rgraph" d="{{appdata.rgraph}}" stroke="red" stroke-width="1" fill="none" />
+<path id="ggraph" d="{{appdata.ggraph}}" stroke="green" stroke-width="1" fill="none" />
+</svg>
+
+<table border="2" cellspacing="0" cellpadding="5" ng-if="appdata.mode==2">
+<tr>
+<td>#</td>
+<td>Период</td>
+<td>Продажи</td>
+<td>Скользящее среднее</td>
+<td>Сезонный коэффициент</td>
+<td>Сезонный прирост</td>
+<td>Продажи, очищенные от сезонности</td>
+<td>Тренд</td>
+<td>Прогноз</td>
+</tr>
+<tr ng-repeat="si in appdata.rawdata">
+<td style="text-align:right;">{{1+$index}}</td>
+<td style="text-align:right;">{{si.period}}</td>
+<td style="text-align:right;">{{si.rawvalue}}</td>
+<td style="text-align:right;">{{si.slmid}}</td>
+<td style="text-align:right;">{{si.seasonk}}</td>
+<td style="text-align:right;">{{si.seasonrise}}</td>
+<td style="text-align:right;">{{si.noseasonraw}}</td>
+<td style="text-align:right;">{{si.trend}}</td>
+<td style="text-align:right;">{{si.forecast}}</td>
+</tr>
+
+</table>
+
+
+
+<br>
+<span>{{debugoutinfo}}</span>
+<br>
+
+</body>
+</html>
