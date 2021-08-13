@@ -146,13 +146,24 @@ $scope.appdata.ggraph=s;
 $scope.procdata=function(){
 
 let s=0.0;
-if($scope.appdata.rawdata.length>52){
-for (var i = 26; i < $scope.appdata.rawdata.length-26; i++) {
-s=($scope.appdata.rawdata[i-26].rawvalue+$scope.appdata.rawdata[i+26].rawvalue)/2.0;
-for (var j = i-25; j < i+26; j++) {
+for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
+let weeknum=$scope.appdata.rawdata[i].period.slice(4);
+$scope.appdata.seasonmid[weeknum]=0;
+$scope.appdata.seasonkolvo[weeknum]=0;
+}
+let kp=0;
+for (let w in $scope.appdata.seasonmid) {
+  kp+=1;
+}
+let hkp=Math.round(kp / 2);
+
+if($scope.appdata.rawdata.length>kp){
+for (var i = hkp; i < $scope.appdata.rawdata.length-hkp; i++) {
+s=($scope.appdata.rawdata[i-hkp].rawvalue+$scope.appdata.rawdata[i+hkp].rawvalue)/2.0;
+for (var j = i-hkp+1; j < i+hkp; j++) {
 s+=$scope.appdata.rawdata[j].rawvalue;
   }//j
-$scope.appdata.rawdata[i].slmid=s/52.0;
+$scope.appdata.rawdata[i].slmid=s/kp;
 $scope.appdata.rawdata[i].seasonk=$scope.appdata.rawdata[i].rawvalue/$scope.appdata.rawdata[i].slmid;
 $scope.appdata.rawdata[i].seasonrise=$scope.appdata.rawdata[i].rawvalue-$scope.appdata.rawdata[i].slmid;
 let weeknum=$scope.appdata.rawdata[i].period.slice(4);
@@ -166,18 +177,18 @@ $scope.appdata.seasonkolvo[weeknum]=1;
 }
 
 }//i
-let kp=0;
+
 s=0;
 for (let w in $scope.appdata.seasonmid) {
   $scope.appdata.seasonmid[w]=$scope.appdata.seasonmid[w]/$scope.appdata.seasonkolvo[w];
   s+=$scope.appdata.seasonmid[w];
-  kp+=1;
 }
 s=s/kp;
 for (let w in $scope.appdata.seasonmid) {
   $scope.appdata.seasonmid[w]=$scope.appdata.seasonmid[w]/s;
 }
 //console.log(s,$scope.appdata.seasonmid,$scope.appdata.seasonkolvo);
+//console.log($scope.appdata.rawdata);
 for (var i = 0; i < $scope.appdata.rawdata.length; i++) {
 let weeknum=$scope.appdata.rawdata[i].period.slice(4);
 $scope.appdata.rawdata[i].noseasonraw=$scope.appdata.rawdata[i].rawvalue/$scope.appdata.seasonmid[weeknum];
