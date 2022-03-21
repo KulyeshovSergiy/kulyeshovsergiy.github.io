@@ -1,0 +1,173 @@
+<!doctype html>
+<html ng-app="myApp">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.6.0/dist/jquery.min.js"></script>
+<script src="https://kit.fontawesome.com/1e245ed36c.js" crossorigin="anonymous"></script>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.8/angular.min.js"></script>
+<script src="app.js"></script>
+
+</head>
+<body ng-controller="ModelTestAppController" id="theBoby">
+
+<ul class="nav nav-tabs" id="myTab" role="tablist">
+  <li class="nav-item" role="presentation">
+    <button class="nav-link active" id="calculation-tab" data-bs-toggle="tab" data-bs-target="#calculation" type="button" role="tab" aria-controls="calculation" aria-selected="true">calculation</button>
+  </li>
+  <li class="nav-item" role="presentation">
+    <button class="nav-link" id="calc_interest-tab" data-bs-toggle="tab" data-bs-target="#calc_interest" type="button" role="tab" aria-controls="calc_interest" aria-selected="false">calc_interest</button>
+  </li>
+
+</ul>
+<div class="tab-content" id="myTabContent">
+  <div class="tab-pane fade show active" id="calculation" role="tabpanel" aria-labelledby="calculation-tab">
+
+<div ng-if="tf.mode==1" class="m-3">
+    <form name="reqindata">
+        <div class="row mb-3">
+<div class="col-sm-4">
+<label for="productCode" class="form-label">productCode</label>
+<select ng-model="tf.reqindata.productCode" class="form-select form-select-sm" aria-label=".form-select-sm" id="productCode">
+  <option ng-repeat="v in tf.products" value="{{v}}">{{v}}</option>
+</select>
+</div>
+<div class="col-sm-4">
+<label for="code" class="form-label">code</label>
+<select ng-model="tf.reqindata.code" class="form-select form-select-sm" aria-label=".form-select-sm" id="code">
+  <option ng-repeat="v in tf.codes" value="{{v}}">{{v}}</option>
+</select>
+</div>
+        </div>
+        <div class="row mb-3">
+<div class="col-sm-4">
+<label for="startDate" class="form-label">startDate</label>
+<input type='date' ng-model="tf.tmp.startDateRaw" class="form-control" id="startDate" ng-change="date2ISO(tf.tmp.startDateRaw,'startDate','tf')"/>
+</div>
+<div class="col-sm-4">
+<label for="endDate" class="form-label">endDate</label>
+<input type='date' ng-model="tf.tmp.endDateRaw" class="form-control" id="endDate" ng-change="date2ISO(tf.tmp.endDateRaw,'endDate','tf')"/>
+</div>
+<div class="col-sm-4">
+<label for="paymentDay" class="form-label">paymentDay</label>
+<select ng-model="tf.reqindata.paymentDay" class="form-select form-select-md" aria-label=".form-select-md" id="paymentDay">
+  <option ng-repeat="v in tf.paymentdays" value="{{v}}">{{v}}</option>
+</select>
+</div>
+        </div>
+        <div class="row mb-3">
+<div class="col-sm-4">
+<label for="sumForCalc" class="form-label">sum</label>
+<input type='number' ng-model="tf.reqindata.sum" class="form-control" id="sumForCalc" min="0.01" step="0.01"/>
+</div>
+<div class="col-sm-4">
+<label for="interestRateVal" class="form-label">interestRateVal</label>
+<input type='number' ng-model="tf.reqindata.interestRateVal" class="form-control" id="interestRateVal" min="0.01" step="0.01"/>
+</div>
+<div class="col-sm-4 mt-4">
+<button class="btn btn-light" type="submit" ng-click="proc_calculation()">
+<i class="fas fa-calculator"></i>
+send request
+</button>
+</div>
+        </div>
+    </form>
+<div class="row mb-3" ng-if="tf.result">
+    <div class="col-sm-8" ng-if="tf.result.paymentSum">
+        <label for="paymentSum" class="form-label">paymentSum</label>
+<input type='number' ng-model="tf.result.paymentSum" class="form-control" id="paymentSum" readonly/>
+    </div>
+</div>
+<div class="row mb-3" ng-if="tf.result">
+<div class="table-responsive" id="tabledata" style="display: block; height: 600px;" ng-if="tf.result.interestDetails">
+    <table class="table table-striped table-bordered table-sm">
+        <thead id="tableheader">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">dateFrom</th>
+                <th scope="col">dateTo</th>
+                <th scope="col">loanPart</th>
+                <th scope="col">percentAmount</th>
+                <th scope="col">percentAmountProlong</th>
+                <th scope="col">loanRest</th>
+                <th scope="col">loanPart+percentAmount</th>
+            </tr>
+        </thead>
+        <tbody id="tabledatatbody" style="overflow:scroll;" ng-if="tf.result.interestDetails.length>0">
+            <tr ng-repeat="r in tf.result.interestDetails">
+                <td>{{1+$index}}</td>
+                <td>{{r.dateFrom}}</td>
+                <td>{{r.dateTo}}</td>
+                <td>{{r.loanPart}}</td>
+                <td>{{r.percentAmount}}</td>
+                <td>{{r.percentAmountProlong}}</td>
+                <td>{{r.loanRest}}</td>
+                <td>{{ theRound(r.loanPart+r.percentAmount) }}</td>
+            </tr>
+        </tbody>
+        </table>
+
+</div>
+</div>
+</div>
+
+</div>
+<div class="tab-pane fade" id="calc_interest" role="tabpanel" aria-labelledby="calc_interest-tab">
+<div ng-if="ci.mode==1" class="m-3">
+    <form name="ciindata">
+        <div class="row mb-3">
+<div class="col-sm-4">
+<label for="dateFrom" class="form-label">dateFrom</label>
+<input type='date' ng-model="ci.tmp.dateFromRaw" class="form-control" id="dateFrom" ng-change="date2ISO(ci.tmp.dateFromRaw,'dateFrom','ci')"/>
+</div>
+<div class="col-sm-4">
+<label for="dateTo" class="form-label">dateTo</label>
+<input type='date' ng-model="ci.tmp.dateToRaw" class="form-control" id="dateTo" ng-change="date2ISO(ci.tmp.dateToRaw,'dateTo','ci')"/>
+</div>
+        </div>
+        <div class="row mb-3">
+<div class="col-sm-4">
+<label for="sumForCalc" class="form-label">sumForCalc</label>
+<input type='number' ng-model="ci.reqindata.sumForCalc" class="form-control" id="sumForCalc" min="0.01" step="0.01"/>
+</div>
+<div class="col-sm-4">
+<label for="interestRateVal" class="form-label">interestRateVal</label>
+<input type='number' ng-model="ci.reqindata.interestRateVal" class="form-control" id="interestRateVal" min="0.01" step="0.01"/>
+</div>
+        </div>
+        <div class="row mb-3">
+<div class="col-sm-4">
+<div class="form-check form-switch">
+<input class="form-check-input" type="checkbox" role="switch" id="endOfMonthCalcMark" ng-model="ci.tmp.endOfMonthCalcMarkRaw" ng-change="switch2num(ci.tmp.endOfMonthCalcMarkRaw,'endOfMonthCalcMark','ci')">
+<label class="form-check-label" for="endOfMonthCalcMark">endOfMonthCalcMark</label>
+</div>
+</div>
+<div class="col-sm-4">
+<button class="btn btn-light" type="submit" ng-click="proc_calc_interest()">
+<i class="fas fa-calculator"></i>
+send request
+</button>
+</div>
+        </div>
+    </form>
+<div class="row mb-3" ng-if="ci.calcResult">
+    <div class="col-sm-8">
+        <label for="calcResult" class="form-label">calcResult</label>
+<input type='number' ng-model="ci.calcResult" class="form-control" id="calcResult" readonly/>
+    </div>
+</div>
+</div>
+
+</div>
+
+</div>
+<br>
+<!--<span>{{tf.reqindata}}</span>
+<br>
+<span>{{ci.reqindata}}</span>-->
+
+</body>
+</html>
